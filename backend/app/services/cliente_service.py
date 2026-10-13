@@ -40,15 +40,14 @@ def listar(ativo: bool | None = None) -> list[ClienteRead]:
     ]
 
 
-def obter(cliente_id: UUID) -> ClienteRead:
-    if not cliente_id == _cliente.values():
+def obter(cliente_id: UUID) -> ClienteDB:
+    if cliente_id not in _cliente:
         raise HTTPException(
             status_code=404,
             detail="Nenhum cliente encontrado"
         )
-    else:
-        encontrado = [c for c in _cliente.values()  if cliente_id]
-        return encontrado
+    
+    return _cliente[cliente_id]
 
 def atualizar(cliente_id: UUID, dados:ClienteUpdate) -> ClienteRead:
     cliente = obter(cliente_id)
