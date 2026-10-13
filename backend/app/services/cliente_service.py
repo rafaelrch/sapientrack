@@ -3,9 +3,15 @@ from uuid import UUID, uuid4
 from fastapi import HTTPException
 from app.schemas.cliente import ClienteCreate, ClienteRead, ClienteUpdate
 
-_cliente: dict[UUID, ClienteCreate] = {}
+class ClienteDB(ClienteCreate):
+    id: UUID
+    ativo: bool
+    created_at: datetime
 
-def criar(dados: ClienteCreate) -> ClienteRead:
+
+_cliente: dict[UUID, ClienteDB] = {}
+
+def criar(dados: ClienteCreate) -> ClienteDB:
     if dados.cnpj:
 
         cnpj_existe = any(cliente.cnpj == dados.cnpj for cliente in _cliente.values())
@@ -16,14 +22,13 @@ def criar(dados: ClienteCreate) -> ClienteRead:
                 detail="Já existe um cliente cadastrado com este CNPJ!"
             )
 
-    novo_cliente = ClienteRead(
+    novo_cliente = ClienteDB(
         **dados.model_dump(),
         id=uuid4(),
         ativo=True,
         created_at=datetime.now(timezone.utc)
     )
     _cliente[novo_cliente.id] = novo_cliente
-    print("Cliente criado com sucesso!")
     return novo_cliente
         
 
